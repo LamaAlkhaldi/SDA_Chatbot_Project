@@ -1,0 +1,48 @@
+name: Trigger auto deployment for containerstage10
+
+# When this action will be executed
+on:
+  # Automatically trigger it when detected changes in repo
+  push:
+    branches: 
+      [ Stage10 ]
+    paths:
+    - '**'
+    - '.github/workflows/containerstage10-AutoDeployTrigger-61e04332-76b1-4387-b0fd-144e88026319.yml'
+
+  # Allow manual trigger 
+  workflow_dispatch:      
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions: 
+      id-token: write #This is required for requesting the OIDC JWT Token
+      contents: read #Required when GH token is used to authenticate with private repo
+
+    steps:
+      - name: Checkout to the branch
+        uses: actions/checkout@v2
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.CONTAINERSTAGE10_AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.CONTAINERSTAGE10_AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.CONTAINERSTAGE10_AZURE_SUBSCRIPTION_ID }}
+
+      - name: Build and push container image to registry
+        uses: azure/container-apps-deploy-action@v2
+        with:
+          appSourcePath: ${{ github.workspace }}
+          _dockerfilePathKey_: _dockerfilePath_
+          registryUrl: ragsistrystage10.azurecr.io
+          registryUsername: ${{ secrets.CONTAINERSTAGE10_REGISTRY_USERNAME }}
+          registryPassword: ${{ secrets.CONTAINERSTAGE10_REGISTRY_PASSWORD }}
+          containerAppName: containerstage10
+          resourceGroup: stage10
+          imageToBuild: ragsistrystage10.azurecr.io/containerstage10:${{ github.sha }}
+          _buildArgumentsKey_: |
+            _buildArgumentsValues_
+
+
