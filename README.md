@@ -2,7 +2,7 @@
 
 
 # Create a README.md file with the provided content
-readme_content = """\
+
 ## 💬 Stage 2: Adding Chat History and Database Integration
 
 In this stage, we enhance our chatbot—built with **Streamlit** and **FastAPI**—by implementing **chat history storage**.  
@@ -34,3 +34,14 @@ Start by creating a PostgreSQL database named `chatbot`:
 
 ```sql
 CREATE DATABASE chatbot;
+```
+2️⃣ Create the chats Table
+Inside the database, create a table to store chat history:
+```sql
+CREATE TABLE IF NOT EXISTS chats (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    file_path TEXT NOT NULL,
+    last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
