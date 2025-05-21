@@ -5,7 +5,7 @@ date
 echo "Updating Python application on VM..."
 
 HOME_DIR=$(eval echo ~$USER)
-APP_DIR="$HOME_DIR/SDA-Chatbot-Project"
+APP_DIR="$HOME_DIR/SDA_Chatbot_Project"
 REPO_URL="https://github.com/LamaAlkhaldi/SDA_Chatbot_Project.git"
 BRANCH="Stage6"
 GITHUB_TOKEN=$TOKEN  # Passed securely via protectedSettings
