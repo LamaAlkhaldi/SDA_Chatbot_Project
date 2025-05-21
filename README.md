@@ -1,4 +1,4 @@
-## 💬 Stage 2: Adding Chat History and Database Integration
+## 💬 Stage 3: Adding Chat History and Database Integration
 
 In this stage, we enhance our chatbot—built with **Streamlit** and **FastAPI**—by implementing **chat history storage**.  
 Conversations are now saved locally, while session details are stored in a **PostgreSQL** database, allowing users to resume their chats seamlessly.
