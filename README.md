@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS chats (
 Save your OpenAI API key along with your database credentials inside a .env file to securely manage sensitive information.
 
 Your .env file should be structured as follows:
+
 OPENAI_API_KEY=YOUR-OPENAI-API-KEY
 DB_NAME=YOUR-DB-NAME
 DB_USER=YOUR-DB-USER
@@ -37,6 +38,7 @@ DB_PASSWORD=YOUR-DB-PASSWORD
 DB_HOST=YOUR-DB-HOST
 DB_PORT=YOUR-DB-PORT
 Start the Backend
+
 Before running the chatbot, start the FastAPI backend using:
 
 uvicorn backend:app --reload
