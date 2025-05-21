@@ -6,8 +6,8 @@ echo "Updating Python application on VM..."
 
 HOME_DIR=$(eval echo ~$USER)
 APP_DIR="$HOME_DIR/SDA-Chatbot-Project"
-REPO_URL="https://github.com/Mohammed78vr/SDA-Chatbot-Project.git"
-BRANCH="stage-6test"
+REPO_URL="https://github.com/LamaAlkhaldi/SDA_Chatbot_Project.git"
+BRANCH="Stage6"
 GITHUB_TOKEN=$TOKEN  # Passed securely via protectedSettings
 
 # Update code
