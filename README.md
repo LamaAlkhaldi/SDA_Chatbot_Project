@@ -48,3 +48,5 @@ Start the Frontend
 Once the backend is running, launch the Streamlit app with:
 
 streamlit run chatbot.py
+CREATE DATABASE chatbot;
+
