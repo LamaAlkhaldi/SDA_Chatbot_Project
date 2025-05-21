@@ -1,52 +1,38 @@
-# Stage 6: Enhanced Infrastructure for Document-Aware Chatbot
+# Stage 6: Scalable Infrastructure for Document-Aware Chatbot
 
-In Stage 6, the **SDA-Chatbot** project introduces a robust and scalable infrastructure designed to support **Retrieval-Augmented Generation (RAG)** capabilities for document-focused chatbot interactions.
+## Overview
+Stage 6 of the SDA-Chatbot project introduces a production-ready architecture designed for scalability and robustness. This phase integrates advanced infrastructure components to support a Retrieval-Augmented Generation (RAG) chatbot, enabling accurate, context-aware responses based on uploaded PDF documents.
 
----
+## Architecture Components
 
-## Infrastructure Overview
+### 1. User Interaction
+Users interact with the chatbot via a Streamlit-based web interface. They can chat casually or upload PDF files to receive document-specific responses.
 
-The system incorporates the following components:
+### 2. Secure Azure Virtual Machine (VM)
+The core services are hosted on a secure Azure VM, which includes:
+- **Network Security Group (NSG)**: Manages inbound/outbound traffic.
+- **Disk Storage**: Ensures data persistence.
+- **Network Interfaces**: Handles external and internal network communications.
 
-### User Interaction
-- Users interact via a **web interface** (Streamlit).
-- Users can upload **PDF files** and ask questions specific to the content.
+### 3. Backend Services
+- **Streamlit** serves the frontend.
+- **FastAPI** handles the backend logic and LLM integration.
 
-### Secure Azure VM
-- Hosts all backend services securely.
-- Includes:
-  - Subnet with NSG for controlled access.
-  - Disk storage for data persistence.
-  - Network Interfaces for communication.
+### 4. PostgreSQL Database
+Stores chat history, metadata, and user interactions securely.
 
-### Backend Services
-- **Streamlit**: Frontend web interface.
-- **FastAPI**: Handles business logic and API routing.
+### 5. Chroma Vector Store
+Enhances the chatbot's ability to retrieve relevant content from uploaded PDFs, improving response accuracy.
 
-### Data Storage
-- **PostgreSQL**: Stores chat history, metadata, and session info.
-
-### Context Retrieval
-- **Chroma**: A vector store for retrieving context from PDFs.
-
-### Automation
-- **GitHub Actions**: Automates deployment and continuous integration.
-
----
-
-## Key Benefits
-
-- Support for **context-aware document interaction**.
-- Enhanced **response accuracy** using vector-based search.
-- Modular and scalable architecture ready for production.
+### 6. GitHub Actions (CI/CD)
+Automates the deployment and update process using GitHub Actions for continuous integration and delivery.
 
 ---
 
 ## Getting Started
 
-### Step 1: VM Initialization (Custom Data Script)
-Use this during VM creation:
-
+### Step 1: Initialize the VM with Custom Data
+Use this script when creating the VM:
 ```bash
 #!/bin/bash
 sudo apt update
@@ -57,6 +43,8 @@ sudo -u azureuser mkdir -p /home/azureuser/miniconda3
 sudo -u azureuser wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /home/azureuser/miniconda3/miniconda.sh
 sudo -u azureuser bash /home/azureuser/miniconda3/miniconda.sh -b -u -p /home/azureuser/miniconda3
 sudo -u azureuser rm /home/azureuser/miniconda3/miniconda.sh
+
+# Set PATH
 echo 'export PATH="/home/azureuser/miniconda3/bin:$PATH"' | sudo -u azureuser tee -a /home/azureuser/.bashrc
 
 # Install PostgreSQL
@@ -69,22 +57,20 @@ sudo systemctl start postgresql
 sudo systemctl enable postgresql
 ```
 
-### Step 2: Bash Script to Run the App
-Create `setup.sh`:
-
+### Step 2: Bash Script for App Setup
+Create a `setup.sh` file:
 ```bash
 #!/bin/bash
 set -e
-date
+
 echo "Updating Python application on VM..."
 
-HOME_DIR=$(eval echo ~$USER)
-APP_DIR="$HOME_DIR/SDA-Chatbot-Project"
+APP_DIR="$HOME/SDA-Chatbot-Project"
 REPO_URL="https://github.com/Mohammed78vr/SDA-Chatbot-Project.git"
 BRANCH="main"
-GITHUB_TOKEN=$TOKEN  # Passed securely
+GITHUB_TOKEN=$TOKEN
 
-# Update or clone the repo
+# Clone or update repo
 if [ -d "$APP_DIR" ]; then
     sudo -u azureuser bash -c "cd $APP_DIR && git fetch origin && git reset --hard origin/$BRANCH"
 else
@@ -92,109 +78,95 @@ else
 fi
 
 # Install dependencies
-sudo -u azureuser $HOME_DIR/miniconda3/envs/project/bin/pip install --upgrade pip
-sudo -u azureuser $HOME_DIR/miniconda3/envs/project/bin/pip install -r "${APP_DIR}/requirements.txt"
+sudo -u azureuser $HOME/miniconda3/envs/project/bin/pip install --upgrade pip
+sudo -u azureuser $HOME/miniconda3/envs/project/bin/pip install -r "$APP_DIR/requirements.txt"
 
 # Restart services
 sudo systemctl restart backend
-sudo systemctl is-active --quiet backend || echo "Backend failed to start"
 sudo systemctl restart frontend
-sudo systemctl is-active --quiet frontend || echo "Frontend failed to start"
-echo "Python application update completed!"
 ```
-
-Run it with:
+Run it using:
 ```bash
-bash setup.sh <PAT_token> <repo_url> <branch_name> <db_host> <target_db> <db_username> <db_password>
+bash setup.sh <PAT_token> <repo_url> <branch> <db_host> <db_name> <db_user> <db_pass>
 ```
 
-### Step 3: Configure Environment Variables
-Create a `.env` file:
-
+### Step 3: .env File Configuration
 ```env
-OPENAI_API_KEY=sk-...
+OPENAI_API_KEY=your-key
 DB_NAME=your-db
 DB_USER=your-user
 DB_PASSWORD=your-password
-DB_HOST=your-db-host
+DB_HOST=your-host
 DB_PORT=5432
 AZURE_STORAGE_SAS_URL=...
 AZURE_STORAGE_CONTAINER=...
-CHROMADB_HOST=your-vm-ip
+CHROMADB_HOST=your-chromadb-ip
 CHROMADB_PORT=8000
 ```
 
-> ⚠️ Make sure to enable public access and add your IP address in Azure.
+Enable public access to the database server and add your current IP.
 
-### Step 4: Restart Backend
+### Step 4: Restart Backend Service
 ```bash
 sudo systemctl restart backend.service
 sudo systemctl status backend.service
 ```
 
-### Step 5: Test Application
+### Step 5: Access the Frontend
+Check service status:
 ```bash
 sudo systemctl status frontend.service
 ```
-Use the VM's external IP to access the chatbot.
+Access the app using the external IP on port `8501`. Ensure inbound NSG rules allow port 8501.
 
-> 🔒 Allow port `8501` in the NSG for Streamlit access.
-
----
-
-## Step 6: Prepare GitHub Action for CI/CD
-Create `update_app.sh`:
-
+### Step 6: Prepare CI/CD Scripts
+Create a `update_app.sh` script in the repo root:
 ```bash
 #!/bin/bash
 set -e
-date
+
 echo "Updating Python application on VM..."
 
-HOME_DIR=$(eval echo ~$USER)
-APP_DIR="$HOME_DIR/SDA-Chatbot-Project"
-REPO_URL="https://github.com/<your_github_account>/SDA-Chatbot-Project.git"
+APP_DIR="$HOME/SDA-Chatbot-Project"
+REPO_URL="https://github.com/<your_username>/SDA-Chatbot-Project.git"
 BRANCH="main"
 GITHUB_TOKEN=$TOKEN
 
 if [ -d "$APP_DIR" ]; then
-  sudo -u azureuser bash -c "cd $APP_DIR && git fetch origin && git reset --hard origin/$BRANCH"
+    sudo -u azureuser bash -c "cd $APP_DIR && git fetch origin && git reset --hard origin/$BRANCH"
 else
-  sudo -u azureuser git clone -b "$BRANCH" "https://${GITHUB_TOKEN}@${REPO_URL}" "$APP_DIR"
+    sudo -u azureuser git clone -b "$BRANCH" "https://${GITHUB_TOKEN}@${REPO_URL}" "$APP_DIR"
 fi
 
-sudo -u azureuser $HOME_DIR/miniconda3/envs/project/bin/pip install --upgrade pip
-sudo -u azureuser $HOME_DIR/miniconda3/envs/project/bin/pip install -r "${APP_DIR}/requirements.txt"
+sudo -u azureuser $HOME/miniconda3/envs/project/bin/pip install --upgrade pip
+sudo -u azureuser $HOME/miniconda3/envs/project/bin/pip install -r "$APP_DIR/requirements.txt"
 
 sudo systemctl restart backend
 sudo systemctl restart frontend
-echo "Python application update completed!"
 ```
 
-Create `.github/workflows/deploy.yml`:
-
+Then add a GitHub Actions workflow in `.github/workflows/deploy.yml`:
 ```yaml
-name: Python App CI/CD Pipeline with Direct Deployment
+name: CI/CD Deployment
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Set Up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          cache: 'pip'
 
-      - name: Install dependencies
+      - name: Install Requirements
         run: pip install -r requirements.txt
 
       - name: Azure Login
@@ -214,16 +186,13 @@ jobs:
             --protected-settings '{"commandToExecute": "export GITHUB_TOKEN=${{ secrets.TOKEN }} && sudo -u azureuser bash /home/azureuser/SDA-Chatbot-Project/update_app.sh"}'
 ```
 
-> 🧠 Make sure to add these GitHub repository secrets:
-> - `AZURE_CREDENTIALS`
-> - `RESOURCE_GROUP`
-> - `TOKEN` (GitHub PAT)
-> - `VM_NAME`
-
-### Step 7: Push and Deploy
-Make changes and push to `main`. GitHub Actions will deploy automatically.
+Add these secrets to your repo:
+- `AZURE_CREDENTIALS`
+- `RESOURCE_GROUP`
+- `VM_NAME`
+- `TOKEN`
 
 ---
 
-## ✅ Done!
-You now have a cloud-hosted, document-aware RAG chatbot with scalable architecture and CI/CD automation.
+## Conclusion
+Stage 6 makes your chatbot ready for real-world deployment, with powerful document-aware capabilities and a modern DevOps pipeline. This setup is highly modular, scalable, and production-grade.
