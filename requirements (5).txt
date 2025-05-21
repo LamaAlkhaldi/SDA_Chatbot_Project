@@ -1,0 +1,7 @@
+openai
+streamlit
+dotenv
+fastapi 
+uvicorn 
+pydantic
+psycopg2-binary
